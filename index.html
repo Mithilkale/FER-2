@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Ferrari Heartbeat Surprise</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Myth Love</title>
 <style>
 body {
 margin: 0; padding: 0;
@@ -17,91 +17,202 @@ transition: background 1.2s;
 background: rgba(255,255,255,0.85);
 border-radius: 18px; padding: 40px 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.05);
 text-align: center; z-index: 2;
+max-width: 400px;
 }
 .hidden { display:none; }
-.ferrari-bg {
-background: #080808!important; color: #fff!important;
-transition: background 1s, color 1s;
+
+input[type="text"] {
+font-size:1.2em;
+width: 70%;
+padding: 10px;
+border-radius:10px;
+border:1px solid #ccc;
 }
-.ferrari-car {
-width: 380px; margin: 64px auto 32px auto; cursor: pointer;
-animation: carin 2s cubic-bezier(0.5,1,0.6,1);
-filter:drop-shadow(0 14px 38px #dd3333cc);
+button {
+font-size:1.1em;
+padding: 10px 24px;
+border-radius:8px;
+background: #f06292;
+border:none;
+cursor: pointer;
+color: white;
+margin-top: 16px;
+transition: background 0.3s ease;
 }
-@keyframes carin {
-0% { transform: translateX(-100vw) scale(0.7); opacity:0; }
-60% { opacity:1; transform:translateX(0) scale(1.04);}
-90% { transform: scale(0.97);}
-100% {transform: scale(1);}
+button:hover {
+background: #e91e63;
 }
-.prompt-text {
-font-size: 1.5em; font-weight: 600; color: #f44336; margin-bottom: 16px;
-animation: popin 1s cubic-bezier(0.7,0.2,0.9,0.85);
+
+#error {
+color: #e10050;
+margin-top: 14px;
+min-height: 24px;
 }
-@keyframes popin {
-0% {opacity:0; transform:scale(0.8);}
-80%{opacity:1;transform:scale(1.1);}
-100% {opacity:1;transform:scale(1);}
+
+/* Confetti canvas styling */
+#confetti-canvas {
+position: fixed;
+pointer-events: none;
+top: 0; left: 0;
+width: 100%; height: 100%;
+z-index: 10;
 }
 </style>
 </head>
 <body>
-<div id="main-content" class="center">
+
+<!-- Step 1: Name input -->
+<div id="step1" class="center">
 <h1>Welcome!</h1>
 <p>What's your name?</p>
-<input id="name-input" type="text" placeholder="Enter your name" style="font-size:1.2em;width: 70%;padding: 10px;border-radius:10px;border:1px solid #ccc;">
-<br><br>
-<button onclick="checkName()" style="font-size:1em;padding:8px 24px;border-radius:8px;background:pink;border:none;cursor:pointer;">Submit</button>
-<div id="error" style="color:#e10050;margin-top:14px;"></div>
+<input id="name-input" type="text" placeholder="Enter your name" />
+<br />
+<button onclick="checkName()">Submit</button>
+<div id="error"></div>
 </div>
-<div id="ferrari-content" class="center hidden">
-<div class="prompt-text">Click on me!</div>
-<img
-class="ferrari-car"
-src="https://upload.wikimedia.org/wikipedia/commons/4/47/Ferrari_F1_SF21_Sainz_Bahrain2021.jpg"
-alt="Ferrari F1 Car"
-onclick="showMessage()"
-/>
+
+<!-- Step 2: Question page -->
+<div id="step2" class="center hidden">
+<h2>Who loves Myth more?</h2>
+<button id="love-btn" onclick="loveClick()">I love him more</button>
+<div id="love-message" style="margin-top:12px; min-height: 48px; font-weight: 600;"></div>
 </div>
+
+<!-- Optional Canvas for confetti -->
+<canvas id="confetti-canvas" class="hidden"></canvas>
+
 <script>
+// Name matching logic same as before - partial and fuzzy matching
 const validNames = [
 "rudss","rudsie","ruds","rudrani","rudrani bhandarkar"
 ];
-function checkName(){
-let input = document.getElementById('name-input').value.trim().toLowerCase();
-let error = document.getElementById('error');
+
+function checkName() {
+const input = document.getElementById('name-input').value.trim().toLowerCase();
+const error = document.getElementById('error');
 error.innerHTML = "";
-if(!input){ error.innerHTML = "Please enter your name."; return; }
-// match with partials and similar
+if (!input) {
+error.innerHTML = "Please enter your name.";
+return;
+}
 let matched = validNames.some(
 n => input.includes(n.replace(/ /g, '').toLowerCase())
 );
-// fuzzy matching: allow up to 2 character difference
-if(!matched){
-matched = validNames.some(function(n){
-let a=n.replace(/ /g,'').toLowerCase(),b=input;
-if(Math.abs(a.length-b.length)>2) return false;
-let c=0;
-for(let i=0;i<Math.min(a.length,b.length);i++){
-if(a[i]!=b[i])c++;
-if(c>2)break;
+if (!matched) {
+matched = validNames.some(function(n) {
+let a = n.replace(/ /g,'').toLowerCase(), b = input;
+if (Math.abs(a.length - b.length) > 2) return false;
+let c = 0;
+for (let i=0; i<Math.min(a.length, b.length); i++) {
+if (a[i] !== b[i]) c++;
+if (c > 2) break;
 }
-return c<=2;
+return c <= 2;
 });
 }
-if(matched){
-document.body.classList.add("ferrari-bg");
-document.getElementById('main-content').classList.add("hidden");
-setTimeout(()=>{
-document.getElementById('ferrari-content').classList.remove("hidden");
-}, 900);
+if (matched) {
+// Move to next step
+document.getElementById('step1').classList.add('hidden');
+document.getElementById('step2').classList.remove('hidden');
 } else {
 error.innerHTML = "Sorry, only special names get the surprise!";
 }
 }
-function showMessage(){
-alert("My heart beats faster than this car goes on track. I love youuuu my rudsie");
+
+// Love button logic
+let clickCount = 0;
+const loveMessage = document.getElementById('love-message');
+
+function loveClick() {
+clickCount++;
+if (clickCount === 1) {
+loveMessage.textContent = "Noooo myth loves you more, try clicking me more again.";
+} else if (clickCount === 2) {
+loveMessage.textContent = "Then give myth a kissi.";
+launchConfetti();
 }
+}
+
+
+// Confetti effect logic
+function launchConfetti() {
+const canvas = document.getElementById("confetti-canvas");
+const ctx = canvas.getContext("2d");
+canvas.classList.remove('hidden');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const pieces = [];
+const colors = ["#f44336", "#e91e63", "#9c27b0", "#2196f3", "#00bcd4", "#4caf50", "#ffeb3b"];
+const gravity = 0.5;
+const drag = 0.075;
+const terminalVelocity = 5;
+const count = 150;
+
+function randomRange(min, max) {
+return Math.random() * (max - min) + min;
+}
+
+function ConfettiPiece() {
+this.x = Math.random() * canvas.width;
+this.y = Math.random() * canvas.height - canvas.height;
+this.size = randomRange(7, 12);
+this.color = colors[Math.floor(Math.random() * colors.length)];
+this.rotation = randomRange(0, 2 * Math.PI);
+this.speed = randomRange(2, 5);
+this.opacity = randomRange(0.7, 1);
+this.rotationSpeed = randomRange(-0.1, 0.1);
+this.velocityX = randomRange(-2, 2);
+this.velocityY = randomRange(1, 3);
+}
+
+ConfettiPiece.prototype.update = function () {
+this.velocityY += gravity;
+this.velocityY = Math.min(this.velocityY, terminalVelocity);
+this.x += this.velocityX;
+this.y += this.velocityY;
+this.rotation += this.rotationSpeed;
+
+if(this.y > canvas.height) {
+this.y = 0 - this.size;
+this.x = Math.random() * canvas.width;
+this.velocityY = randomRange(1, 3);
+this.velocityX = randomRange(-2, 2);
+}
+};
+
+ConfettiPiece.prototype.draw = function (ctx) {
+ctx.save();
+ctx.translate(this.x, this.y);
+ctx.rotate(this.rotation);
+ctx.fillStyle = this.color;
+ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size * 0.4);
+ctx.restore();
+};
+
+for(let i = 0; i < count; i++) {
+pieces.push(new ConfettiPiece());
+}
+
+function update() {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+pieces.forEach(p => {
+p.update();
+p.draw(ctx);
+});
+requestAnimationFrame(update);
+}
+
+update();
+
+// Stop confetti after 5 seconds
+setTimeout(()=> {
+canvas.classList.add('hidden');
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+}, 5000);
+}
+
 </script>
+
 </body>
 </html>
