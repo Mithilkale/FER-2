@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ferrari Heartbeat Surprise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+margin: 0; padding: 0;
+font-family: 'Montserrat', sans-serif;
+background: linear-gradient(120deg, #f7cac9, #92a8d1, #ffe0ac);
+min-height: 100vh;
+display: flex; align-items: center; justify-content: center;
+transition: background 1.2s;
+}
+.center {
+background: rgba(255,255,255,0.85);
+border-radius: 18px; padding: 40px 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+text-align: center; z-index: 2;
+}
+.hidden { display:none; }
+.ferrari-bg {
+background: #080808!important; color: #fff!important;
+transition: background 1s, color 1s;
+}
+.ferrari-car {
+width: 380px; margin: 64px auto 32px auto; cursor: pointer;
+animation: carin 2s cubic-bezier(0.5,1,0.6,1);
+filter:drop-shadow(0 14px 38px #dd3333cc);
+}
+@keyframes carin {
+0% { transform: translateX(-100vw) scale(0.7); opacity:0; }
+60% { opacity:1; transform:translateX(0) scale(1.04);}
+90% { transform: scale(0.97);}
+100% {transform: scale(1);}
+}
+.prompt-text {
+font-size: 1.5em; font-weight: 600; color: #f44336; margin-bottom: 16px;
+animation: popin 1s cubic-bezier(0.7,0.2,0.9,0.85);
+}
+@keyframes popin {
+0% {opacity:0; transform:scale(0.8);}
+80%{opacity:1;transform:scale(1.1);}
+100% {opacity:1;transform:scale(1);}
+}
+</style>
+</head>
+<body>
+<div id="main-content" class="center">
+<h1>Welcome!</h1>
+<p>What's your name?</p>
+<input id="name-input" type="text" placeholder="Enter your name" style="font-size:1.2em;width: 70%;padding: 10px;border-radius:10px;border:1px solid #ccc;">
+<br><br>
+<button onclick="checkName()" style="font-size:1em;padding:8px 24px;border-radius:8px;background:pink;border:none;cursor:pointer;">Submit</button>
+<div id="error" style="color:#e10050;margin-top:14px;"></div>
+</div>
+<div id="ferrari-content" class="center hidden">
+<div class="prompt-text">Click on me!</div>
+<img
+class="ferrari-car"
+src="https://upload.wikimedia.org/wikipedia/commons/4/47/Ferrari_F1_SF21_Sainz_Bahrain2021.jpg"
+alt="Ferrari F1 Car"
+onclick="showMessage()"
+/>
+</div>
+<script>
+const validNames = [
+"rudss","rudsie","ruds","rudrani","rudrani bhandarkar"
+];
+function checkName(){
+let input = document.getElementById('name-input').value.trim().toLowerCase();
+let error = document.getElementById('error');
+error.innerHTML = "";
+if(!input){ error.innerHTML = "Please enter your name."; return; }
+// match with partials and similar
+let matched = validNames.some(
+n => input.includes(n.replace(/ /g, '').toLowerCase())
+);
+// fuzzy matching: allow up to 2 character difference
+if(!matched){
+matched = validNames.some(function(n){
+let a=n.replace(/ /g,'').toLowerCase(),b=input;
+if(Math.abs(a.length-b.length)>2) return false;
+let c=0;
+for(let i=0;i<Math.min(a.length,b.length);i++){
+if(a[i]!=b[i])c++;
+if(c>2)break;
+}
+return c<=2;
+});
+}
+if(matched){
+document.body.classList.add("ferrari-bg");
+document.getElementById('main-content').classList.add("hidden");
+setTimeout(()=>{
+document.getElementById('ferrari-content').classList.remove("hidden");
+}, 900);
+} else {
+error.innerHTML = "Sorry, only special names get the surprise!";
+}
+}
+function showMessage(){
+alert("My heart beats faster than this car goes on track. I love youuuu my rudsie");
+}
+</script>
+</body>
+</html>
