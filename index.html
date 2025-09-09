@@ -1,33 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Myth Love Journey</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
     body {
       margin: 0; padding: 0;
       font-family: 'Montserrat', sans-serif;
       background: linear-gradient(120deg, #f7cac9, #92a8d1, #ffe0ac);
       min-height: 100vh;
+      overflow-x: hidden;
       display: flex; align-items: center; justify-content: center;
       transition: background 1.2s;
       color: #333;
     }
     .center {
-      background: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.9);
       border-radius: 18px; padding: 40px 30px; box-shadow: 0 12px 32px rgba(0,0,0,0.12);
-      text-align: center; max-width: 440px; position: relative;
+      text-align: center; max-width: 420px; position: relative;
       user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    input[type="text"] {
+    input[type="text"], input[type="text"]::placeholder {
       font-size:1.2em;
       width: 75%;
       padding: 10px;
       border-radius:10px;
       border:1px solid #ccc;
       transition: border-color 0.3s ease;
+      text-align: center;
+      box-sizing: border-box;
     }
     input[type="text"]:focus {
       outline:none;
@@ -49,75 +56,36 @@
     button:hover {
       background: #e91e63;
     }
-    #error, #answer-error, #yesno-error {
+    #error, #answer-error, #no-answer-msg {
       color: #e10050;
       margin-top: 14px;
       min-height: 24px;
       font-weight: 600;
     }
     .hidden { display:none; }
-
-    #popup-photo {
-      max-width: 220px;
-      margin: 16px auto 10px auto;
-      border-radius: 16px;
-      box-shadow: 0 6px 24px rgba(180, 73, 121, 0.18);
-      display:block;
+    #love-message, #win-message, #question-container {
+      margin-top: 18px;
+      font-weight: 600;
+      min-height: 48px;
+      font-size: 1.15em;
+      color: #bf1e57;
+      opacity: 0;
+      transition: opacity 1s ease;
+      text-align: center;
     }
-    .fade-in {
-      animation: fadeIn 1.3s cubic-bezier(.4, .08, .32, 1);
+    .visible {
+      opacity: 1;
+    }
+    #confetti-canvas {
+      position: fixed;
+      pointer-events: none;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1000;
     }
     @keyframes fadeIn {
-      from { opacity:0; transform: scale(0.95);}
-      to { opacity:1; transform: scale(1);}
-    }
-    #iloveu-box {
-      background: #fff5fa;
-      color: #bf1e57;
-      border-radius: 14px;
-      padding: 22px 18px 14px 18px;
-      margin: 30px auto 18px auto;
-      box-shadow: 0 4px 24px rgba(237, 116, 153, 0.12);
-      font-size: 1.45em;
-      max-width: 320px;
-      min-height: 60px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      display: flex; flex-direction: column; align-items: center;
-      animation: fadeIn 1s;
-    }
-    #iloveyoumore-btn {
-      margin-top: 12px;
-      background: #fe7ba0;
-      color: #fff;
-      border-radius: 24px;
-      padding: 10px 30px;
-      font-size:1.13em;
-      font-weight: 500;
-      border:none;
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-    #iloveyoumore-btn:hover {
-      background: #fd5a8a;
-    }
-    /* Popup styles */
-    #img-popup {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      background: rgba(255,255,255,0.99);
-      box-shadow: 0 12px 38px rgba(0,0,0,0.20);
-      border-radius: 22px;
-      position: fixed;
-      left:50%; top: 18vh;
-      transform: translateX(-50%);
-      z-index: 99;
-      max-width: 95vw;
-      padding: 32px 16px 25px 16px;
-      text-align: center;
-      outline: none;
+      from {opacity: 0;}
+      to {opacity: 1;}
     }
   </style>
 </head>
@@ -127,7 +95,6 @@
   <h1>Welcome!</h1>
   <p>What's your name?</p>
   <input id="name-input" type="text" placeholder="Enter your name" autocomplete="off" />
-  <br/>
   <button onclick="checkName()">Submit</button>
   <div id="error"></div>
 </div>
@@ -137,7 +104,7 @@
   <button id="love-btn" onclick="loveClick()">I love him more</button>
   <div id="love-message"></div>
   <div id="win-message"></div>
-  <div id="question-container" class="hidden">
+  <div id="question-container" class="hidden" style="flex-direction: column;">
     <p style="margin-bottom:8px;">What is it tomorrow (hint your last year's story)?</p>
     <input type="text" id="kiss-input" placeholder='Your answer here...' autocomplete="off" />
     <button onclick="verifyAnswer()">Submit</button>
@@ -145,27 +112,24 @@
   </div>
 </div>
 
-<!-- Photo/question popup modal (initially hidden) -->
-<div id="img-popup" class="hidden" tabindex="0">
-  <img id="popup-photo" src="" alt="Popup photo"/>
-  <div id="photo-question" style="font-size:1.2em; margin: 16px 0 10px 0;">do you wanna have this forever?</div>
-  <input type="text" id="yesno-input" placeholder="yes / no ..." style="font-size:1.15em; margin-bottom:6px;"/>
-  <button onclick="verifyYesNo()">Submit</button>
-  <div id="yesno-error"></div>
+<div id="step3" class="center hidden" style="flex-direction: column;">
+  <p style="font-weight: 600; font-size: 1.3em; color: #bf1e57;">So, do you wanna love Myth forever?</p>
+  <input type="text" id="forever-input" placeholder="Answer yes or no" autocomplete="off" />
+  <button onclick="checkForeverAnswer()">Submit</button>
+  <div id="no-answer-msg"></div>
+  <div id="final-message" style="font-weight: 600; margin-top: 16px; color: #bf1e57;"></div>
+  <button id="love-you-more-btn" class="hidden" style="margin-top: 20px;">No, I love you more</button>
 </div>
 
-<!-- I love you box -->
-<div id="iloveu-box" class="hidden">
-  <span id="iloveu-text">i love you</span>
-  <button id="iloveyoumore-btn" onclick="loveMore()">i love you more</button>
-</div>
+<!-- Confetti Canvas -->
+<canvas id="confetti-canvas" class="hidden"></canvas>
 
 <script>
-// Name verification logic
 const validNames = [
   "rudss","rudsie","ruds","rudrani","rudrani bhandarkar"
 ];
 
+// Step 1: Validate name
 function checkName() {
   const input = document.getElementById('name-input').value.trim().toLowerCase();
   const error = document.getElementById('error');
@@ -197,7 +161,7 @@ function checkName() {
   }
 }
 
-// Love button interaction
+// Step 2: Love button clicks and message
 let clickCount = 0;
 const loveMessage = document.getElementById('love-message');
 const winMessage = document.getElementById('win-message');
@@ -215,18 +179,19 @@ function loveClick() {
     winMessage.textContent = "Oki you win now give myth a kissi you win.";
     winMessage.classList.add('visible');
     fadeIn(winMessage);
+    launchConfetti();
     setTimeout(()=> {
       showQuestion();
-    }, 1300);
+    }, 2800);
   }
 }
 
 function fadeIn(element) {
-  element.style.animation = 'fadeIn 1.2s ease forwards';
+  element.style.animation = 'fadeIn 1.5s ease forwards';
   setTimeout(() => {
     element.style.opacity = 1;
     element.style.animation = '';
-  }, 1200);
+  }, 1500);
 }
 
 function showQuestion() {
@@ -239,7 +204,7 @@ function showQuestion() {
   }, 100);
 }
 
-// Myth Day answer verifies, then shows popup with photo and yes/no input
+// Step 2: Question verification
 function verifyAnswer() {
   const answerInput = document.getElementById('kiss-input');
   const answerError = document.getElementById('answer-error');
@@ -252,60 +217,115 @@ function verifyAnswer() {
     "mythday"
   ];
   if (validAnswers.includes(val)) {
-    // Hide current step, show popup
+    // Proceed to step 3
     document.getElementById('step2').classList.add('hidden');
-    showImgPopup();
+    document.getElementById('step3').classList.remove('hidden');
   } else {
     answerError.textContent = "Try again! Hint: your last year's story.";
   }
 }
 
-// Show the modal popup with image and yes/no question
-function showImgPopup() {
-  const popup = document.getElementById('img-popup');
-  const photo = document.getElementById('popup-photo');
-  // Set attached photo as src
-  photo.src = "image.jpeg";
-  popup.classList.remove('hidden');
-  photo.classList.add('fade-in');
-  popup.focus();
+// Confetti effect
+function launchConfetti() {
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.classList.remove('hidden');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pieces = [];
+  const colors = ["#f44336", "#e91e63", "#9c27b0", "#2196f3", "#00bcd4", "#4caf50", "#ffeb3b"];
+  const gravity = 0.5;
+  const terminalVelocity = 5;
+  const count = 150;
+
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function ConfettiPiece() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height - canvas.height;
+    this.size = randomRange(7, 12);
+    this.color = colors[Math.floor(Math.random() * colors.length)];
+    this.rotation = randomRange(0, 2 * Math.PI);
+    this.rotationSpeed = randomRange(-0.1, 0.1);
+    this.velocityX = randomRange(-2, 2);
+    this.velocityY = randomRange(1, 3);
+  }
+
+  ConfettiPiece.prototype.update = function () {
+    this.velocityY += gravity;
+    this.velocityY = Math.min(this.velocityY, terminalVelocity);
+    this.x += this.velocityX;
+    this.y += this.velocityY;
+    this.rotation += this.rotationSpeed;
+
+    if(this.y > canvas.height) {
+      this.y = 0 - this.size;
+      this.x = Math.random() * canvas.width;
+      this.velocityY = randomRange(1, 3);
+      this.velocityX = randomRange(-2, 2);
+    }
+  };
+
+  ConfettiPiece.prototype.draw = function (ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotation);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size * 0.4);
+    ctx.restore();
+  };
+
+  for(let i = 0; i < count; i++) {
+    pieces.push(new ConfettiPiece());
+  }
+
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.update();
+      p.draw(ctx);
+    });
+    requestAnimationFrame(update);
+  }
+
+  update();
+
+  // Stop confetti after 5 seconds
+  setTimeout(() => {
+    canvas.classList.add('hidden');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, 5000);
 }
 
-function verifyYesNo() {
-  const input = document.getElementById('yesno-input').value.trim().toLowerCase();
-  const error = document.getElementById('yesno-error');
-  error.textContent = "";
-  if (!input) {
-    error.textContent = "Please type yes or no :)";
-    return;
-  }
-  if (input === 'no') {
-    error.textContent = "wrong answer";
-    document.getElementById('yesno-input').value = "";
-  } else if (input === 'yes') {
-    document.getElementById('img-popup').classList.add('hidden');
-    startLoveLoop();
+// Step 3: Check "love forever" answer
+function checkForeverAnswer() {
+  const input = document.getElementById('forever-input').value.trim().toLowerCase();
+  const noMsg = document.getElementById('no-answer-msg');
+  const finalMsg = document.getElementById('final-message');
+  const btn = document.getElementById('love-you-more-btn');
+  noMsg.textContent = "";
+  finalMsg.textContent = "";
+  btn.classList.add('hidden');
+
+  if (input === "yes") {
+    finalMsg.textContent = "I love you more!";
+    launchConfetti();
+    btn.classList.remove('hidden');
+  } else if (input === "no") {
+    noMsg.textContent = "Wrong answer.";
   } else {
-    error.textContent = "Please type yes or no.";
+    noMsg.textContent = "Please answer yes or no.";
   }
 }
 
-// Looping I love you window
-function startLoveLoop() {
-  const box = document.getElementById('iloveu-box');
-  box.classList.remove('hidden');
-  document.getElementById('iloveu-text').textContent = "i love you";
-}
-
-function loveMore() {
-  const text = document.getElementById('iloveu-text');
-  if (text.textContent === "i love you") {
-    text.textContent = "no i love you more";
-  } else {
-    text.textContent = "i love you more";
-  }
-}
-
+// Button click loop
+const loveYouMoreBtn = document.getElementById('love-you-more-btn');
+loveYouMoreBtn.addEventListener('click', () => {
+  alert("No, I love you more");
+});
 </script>
 
 </body>
